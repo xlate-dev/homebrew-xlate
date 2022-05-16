@@ -1,0 +1,23 @@
+{
+  "name": "xlate-cli",
+  "version": "1.0.0",
+  "description": "This is the XLate client",
+  "main": "index.js",
+  "bin": {
+    "xlate-cli": "./lib/xlate.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node ./lib/xlate.js"
+  },
+  "keywords": [
+    "xlate"
+  ],
+  "author": "xlate-dev",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^9.2.0",
+    "typescript": "^4.6.4"
+  }
+}
