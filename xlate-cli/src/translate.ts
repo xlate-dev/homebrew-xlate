@@ -52,6 +52,10 @@ export const translate = async (dir: string) => {
           maxBuffer: 1024 * 1024 * 100,
         });
         console.log(commandResult);
+        const tarCommand = await exec(
+          `tar czvf /tmp/${projectName}.tgz /tmp/${projectName}/`
+        );
+        console.log(tarCommand);
       } else {
         console.log("NO REGIONS");
       }
