@@ -41,13 +41,16 @@ export const translate = async (dir: string) => {
           knownRegions = knownRegions.concat(regions);
         }
       });
+      // knownRegions = knownRegions.filter((r) => r === "Base");
       if (knownRegions.length) {
         const commandStr = [
           `xcodebuild -exportLocalizations -project "${xcodeprojDir}"`,
+          `-localizationPath "/tmp/${projectName}"`,
           knownRegions.map((region) => `-exportLanguage ${region}`).join(" "),
-          `/tmp/${projectName}`,
         ].join(" ");
-        const commandResult = await exec(commandStr);
+        const commandResult = await exec(commandStr, {
+          maxBuffer: 1024 * 1024 * 100,
+        });
         console.log(commandResult);
       } else {
         console.log("NO REGIONS");
