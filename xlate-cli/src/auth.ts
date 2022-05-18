@@ -144,15 +144,18 @@ async function getGithubTokensFromAuthorizationCode(
       },
       body: JSON.stringify({
         client_id: api.githubClientId,
-        //client_secret: api.githubClientSecret,
+        client_secret: api.githubClientSecret,
         code,
         redirect_uri: callbackUrl,
         state: _nonce,
       }),
     }
   );
-  const res: { body: GitHubAuthResponse } = await response.json();
-  return res.body.access_token as string;
+  const respText = await response.text();
+  const parsedQuery = url.parse(`${callbackUrl}?${respText}`, true);
+  return parsedQuery.query["access_token"] as string;
+  //const res: { body: GitHubAuthResponse } = await response.json();
+  //return res.body.access_token as string;
 }
 
 async function loginWithLocalhostGitHub(port: number): Promise<string> {

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { loginGithub } from "./auth";
+import { signin } from "./firebase";
 import { translate } from "./translate";
 import { pkg } from "./utils";
 const program = new Command();
@@ -25,6 +26,7 @@ program
   .action((str, options) => {
     console.log("login");
     loginGithub();
+    //signin();
   });
 
 program.parse();
