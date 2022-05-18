@@ -2,12 +2,13 @@
 import { Command } from "commander";
 import { loginGithub } from "./auth";
 import { translate } from "./translate";
+import { pkg } from "./utils";
 const program = new Command();
 
 program
   .name("xlate")
   .description("CLI to XLate translation tools")
-  .version("1.0.0");
+  .version(pkg.version);
 
 program
   .command("translate")

@@ -24,3 +24,5 @@ export function envOverride(
   }
   return value;
 }
+
+export const pkg = require("../package.json");
