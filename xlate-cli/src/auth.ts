@@ -121,6 +121,7 @@ async function loginWithLocalhost<ResultType>(
       logger.info();
       logger.info("Waiting for authentication...");
 
+      console.log(authUrl);
       open(authUrl);
     });
 
@@ -143,7 +144,7 @@ async function getGithubTokensFromAuthorizationCode(
       },
       body: JSON.stringify({
         client_id: api.githubClientId,
-        client_secret: api.githubClientSecret,
+        //client_secret: api.githubClientSecret,
         code,
         redirect_uri: callbackUrl,
         state: _nonce,

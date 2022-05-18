@@ -1,20 +1,21 @@
+#!/usr/bin/env node
 import { Command } from "commander";
 import { loginGithub } from "./auth";
+import { translate } from "./translate";
 const program = new Command();
 
 program
-  .name("xlate-cli")
+  .name("xlate")
   .description("CLI to XLate translation tools")
-  .version("0.8.0");
+  .version("1.0.0");
 
 program
   .command("translate")
   .description("translate ios project")
-  .argument("<path>", "project path")
-  .option("--debug", "display debug logging")
+  .argument("[path]", "project path")
   .action((str, options) => {
-    const optStr = options.debug ? "with debug" : "";
-    console.log(`ok, project by path "${str}" will be translated ${optStr}`);
+    const dir = str ?? process.cwd();
+    translate(dir);
   });
 
 program

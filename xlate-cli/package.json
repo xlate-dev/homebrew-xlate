@@ -4,12 +4,13 @@
   "description": "This is the XLate client",
   "main": "index.js",
   "bin": {
-    "xlate-cli": "./lib/xlate.js"
+    "xlate": "./lib/xlate.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "node --enable-source-maps ./lib/xlate.js"
+    "start": "node --enable-source-maps ./lib/xlate.js",
+    "link": "npm link"
   },
   "keywords": [
     "xlate"

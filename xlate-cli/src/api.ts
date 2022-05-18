@@ -7,10 +7,10 @@ export const githubOrigin = utils.envOverride(
 );
 export const githubClientId = utils.envOverride(
   "GITHUB_CLIENT_ID",
-  "89cf50f02ac6aaed3484"
+  "e50d8f0c9f0679ab74d3"
 );
 export const githubClientSecret = utils.envOverride(
   "GITHUB_CLIENT_SECRET",
-  "3330d14abc895d9a74d5f17cd7a00711fa2c5bf0"
+  "259dcadd5738a6f409bdf0a2c4790caf6eeb9055"
 );
 export const request = fetch;
