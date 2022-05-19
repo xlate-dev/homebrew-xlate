@@ -1,7 +1,7 @@
 {
-  "name": "xlate-cli",
-  "version": "0.0.1",
-  "description": "This is the XLate client",
+  "name": "xlate",
+  "version": "1.0.0",
+  "description": "Translate your XCode project into multiple target languages with one command!",
   "main": "index.js",
   "bin": {
     "xlate": "./lib/xlate.js"
@@ -15,7 +15,7 @@
   "keywords": [
     "xlate"
   ],
-  "author": "xlate-dev",
+  "author": "xlate.dev",
   "license": "ISC",
   "dependencies": {
     "cli-color": "^2.0.2",
