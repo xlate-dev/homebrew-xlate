@@ -4,8 +4,10 @@ import {
   GithubAuthProvider,
   signInWithCredential,
   User,
-  browserSessionPersistence,
+  UserCredential,
 } from "firebase/auth";
+import { getStorage, ref } from "firebase/storage";
+import { logger } from "./logger";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB91QOsFjrDJuTEZzrWun27FOHzUjCSofA",
@@ -20,46 +22,24 @@ const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 
-const provider = new GithubAuthProvider();
-export const auth = getAuth();
+export const auth = getAuth(app);
+export const storage = getStorage(app);
 
-provider.addScope("repo");
+export const getStorageRef = (path: string) => {
+  return ref(storage, path);
+};
 
-provider.setCustomParameters({
-  allow_signup: "false",
-});
-
-auth.onAuthStateChanged((user: User | null) => {
+auth.onAuthStateChanged(async (user: User | null) => {
   if (user) {
-    console.log("FIREBASE USER SIGNED IN");
+    logger.info("FIREBASE USER SIGNED IN");
   }
 });
 
-export const signinFirebase = async (githubAccessToken: string) => {
+export const signinFirebase = async (
+  githubAccessToken: string
+): Promise<UserCredential> => {
   const credential = GithubAuthProvider.credential(githubAccessToken);
   const user = await signInWithCredential(auth, credential);
-  /*  
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      // This gives you a GitHub Access Token. You can use it to access the GitHub API.
-      const credential = GithubAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
-
-      // The signed-in user info.
-      const user = result.user;
-      console.log(user);
-      // ...
-    })
-    .catch((error) => {
-      console.log(error);
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      // The email of the user's account used.
-      const email = error.email;
-      // The AuthCredential type that was used.
-      const credential = GithubAuthProvider.credentialFromError(error);
-      // ...
-    });
-    */
+  return user;
+  //ToDo implement refreshtoken
 };

@@ -82,7 +82,11 @@ function annotateDebugLines(logger: winston.Logger): winston.Logger {
 
 const rawLogger = winston.createLogger();
 // Set a default silent logger to suppress logs during tests
-rawLogger.add(new winston.transports.Console({ silent: true }));
+rawLogger.add(
+  new winston.transports.Console({
+    /*silent: true, */ format: winston.format.simple(),
+  })
+);
 rawLogger.exitOnError = false;
 
 // The type system for TypeScript is a bit wonky. The type of winston.LeveledLogMessage
@@ -91,4 +95,6 @@ rawLogger.exitOnError = false;
 // allow error parameters.
 // Casting looks super dodgy, but it should be safe because we know the underlying code
 // handles all parameter types we care about.
-export const logger = annotateDebugLines(expandErrors(rawLogger)) as unknown as Logger;
+export const logger = annotateDebugLines(
+  expandErrors(rawLogger)
+) as unknown as Logger;

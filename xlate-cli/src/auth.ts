@@ -189,7 +189,9 @@ export async function loginGithubWithCachedKey(): Promise<string> {
   }
   return newToken;
 }
-
-export async function clearGithubWithCachedKey() {
+export function setGithubWithCachedKey(newToken: string) {
+  localStorage.setItem("XLATE_loginGithubWithCachedKey", newToken);
+}
+export function clearGithubWithCachedKey() {
   localStorage.setItem("XLATE_loginGithubWithCachedKey", "");
 }

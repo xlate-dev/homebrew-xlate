@@ -15,9 +15,17 @@ program
   .command("translate")
   .description("translate ios project")
   .argument("[path]", "project path")
-  .action((str, options) => {
-    const dir = str ?? process.cwd();
-    translate(dir);
+  .action(async (str, options) => {
+    const token = await loginGithubWithCachedKey();
+    try {
+      const user = await signinFirebase(token);
+      if (user) {
+        const dir = str ?? process.cwd();
+        translate(dir);
+      }
+    } catch (e) {
+      clearGithubWithCachedKey();
+    }
   });
 
 program

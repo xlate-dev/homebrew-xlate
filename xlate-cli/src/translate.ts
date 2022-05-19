@@ -1,6 +1,9 @@
+import { uploadBytes } from "firebase/storage";
 import * as fs from "fs";
 import * as path from "path";
 import { promisify } from "util";
+import { getStorageRef, storage } from "./firebase";
+import { logger } from "./logger";
 const exec = promisify(require("child_process").exec);
 
 async function scanDir(
@@ -26,8 +29,10 @@ async function scanDir(
 }
 
 export const translate = async (dir: string) => {
+  logger.info("looking for xcodeproj...");
   await scanDir(dir, ".xcodeproj", async (xcodeprojDir) => {
     const projectName = path.basename(xcodeprojDir, ".xcodeproj");
+    logger.info(`analizing ${projectName}`);
     await scanDir(xcodeprojDir, "project.pbxproj", async (pbxprojFile) => {
       const res = await exec(`plutil -convert json "${pbxprojFile}" -o -`);
       const resJSON = JSON.parse(res["stdout"]);
@@ -48,16 +53,26 @@ export const translate = async (dir: string) => {
           `-localizationPath "/tmp/${projectName}"`,
           knownRegions.map((region) => `-exportLanguage ${region}`).join(" "),
         ].join(" ");
+        logger.info(`exporting xlocs: ${knownRegions.join(" ")}`);
         const commandResult = await exec(commandStr, {
           maxBuffer: 1024 * 1024 * 100,
         });
-        console.log(commandResult);
+        logger.info(`zipping xlocs: ${knownRegions.join(" ")}`);
         const tarCommand = await exec(
           `tar czvf /tmp/${projectName}.tgz /tmp/${projectName}/`
         );
-        console.log(tarCommand);
+        logger.info(tarCommand);
+
+        /*
+        const ref = getStorageRef(`zips/${projectName}.tgz`);
+
+        const buf = fs.readFileSync(`/tmp/${projectName}.tgz`);
+
+        await uploadBytes(ref, buf);
+        logger.info("uploaded");
+        */
       } else {
-        console.log("NO REGIONS");
+        logger.error("NO REGIONS");
       }
     });
   });
