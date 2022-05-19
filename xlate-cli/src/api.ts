@@ -9,8 +9,8 @@ export const githubClientId = utils.envOverride(
   "GITHUB_CLIENT_ID",
   "e50d8f0c9f0679ab74d3"
 );
-export const githubClientSecret = utils.envOverride(
-  "GITHUB_CLIENT_SECRET",
-  "259dcadd5738a6f409bdf0a2c4790caf6eeb9055"
+export const xlateDevOrigin = utils.envOverride(
+  "XLATE_DEV_URL",
+  "https://app.xlate.dev"
 );
 export const request = fetch;

@@ -136,25 +136,18 @@ async function getGithubTokensFromAuthorizationCode(
   code: string,
   callbackUrl: string
 ) {
-  const response = await api.request(
-    `${api.githubOrigin}/login/oauth/access_token`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_id: api.githubClientId,
-        client_secret: api.githubClientSecret,
-        code,
-        redirect_uri: callbackUrl,
-        state: _nonce,
-      }),
-    }
-  );
-  const respText = await response.text();
-  const parsedQuery = url.parse(`${callbackUrl}?${respText}`, true);
-  return parsedQuery.query["access_token"] as string;
+  const response = await api.request(`${api.xlateDevOrigin}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      provider: "github",
+      code,
+    }),
+  });
+  const respJson = await response.json();
+  return respJson["access_token"] as string;
 }
 
 async function loginWithLocalhostGitHub(port: number): Promise<string> {
