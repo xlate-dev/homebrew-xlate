@@ -29,10 +29,10 @@ async function scanDir(
 }
 
 export const translate = async (dir: string) => {
-  logger.info("looking for xcodeproj...");
+  logger.info("looking for an .xcodeproj...");
   await scanDir(dir, ".xcodeproj", async (xcodeprojDir) => {
     const projectName = path.basename(xcodeprojDir, ".xcodeproj");
-    logger.info(`analizing ${projectName}`);
+    logger.info(`analyzing ${projectName}`);
     await scanDir(xcodeprojDir, "project.pbxproj", async (pbxprojFile) => {
       const res = await exec(`plutil -convert json "${pbxprojFile}" -o -`);
       const resJSON = JSON.parse(res["stdout"]);
@@ -53,11 +53,11 @@ export const translate = async (dir: string) => {
           `-localizationPath "/tmp/${projectName}"`,
           knownRegions.map((region) => `-exportLanguage ${region}`).join(" "),
         ].join(" ");
-        logger.info(`exporting xlocs: ${knownRegions.join(" ")}`);
+        logger.info(`exporting strings (.xcloc): ${knownRegions.join(" ")}`);
         const commandResult = await exec(commandStr, {
           maxBuffer: 1024 * 1024 * 100,
         });
-        logger.info(`zipping xlocs: ${knownRegions.join(" ")}`);
+        logger.info(`Compressing .xlocs: ${knownRegions.join(" ")}`);
         const tarCommand = await exec(
           `tar czvf /tmp/${projectName}.tgz /tmp/${projectName}/`
         );
@@ -72,7 +72,9 @@ export const translate = async (dir: string) => {
         logger.info("uploaded");
         */
       } else {
-        logger.error("NO REGIONS");
+        logger.error(
+          "Could not find knownRegions in your xcodeproj - try opening up the project in XCode and adding a target localization, then re-run xlate."
+        );
       }
     });
   });

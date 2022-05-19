@@ -8,12 +8,12 @@ const program = new Command();
 
 program
   .name("xlate")
-  .description("CLI to XLate translation tools")
+  .description("CLI to xlate translation tools")
   .version(pkg.version);
 
 program
   .command("translate")
-  .description("translate ios project")
+  .description("translate iOS project")
   .argument("[path]", "project path")
   .action(async (str, options) => {
     const token = await loginGithubWithCachedKey();
@@ -30,7 +30,7 @@ program
 
 program
   .command("login")
-  .description("login with github")
+  .description("login with GitHub")
   .action(async (str, options) => {
     const token = await loginGithubWithCachedKey();
     try {
@@ -42,7 +42,7 @@ program
 
 program
   .command("logout")
-  .description("logout with github")
+  .description("logout with GitHub")
   .action(async (str, options) => {
     clearGithubWithCachedKey();
   });
