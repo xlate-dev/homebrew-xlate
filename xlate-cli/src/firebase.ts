@@ -1,9 +1,10 @@
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
-  signInWithPopup,
   GithubAuthProvider,
   signInWithCredential,
+  User,
+  browserSessionPersistence,
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -20,7 +21,7 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 
 const provider = new GithubAuthProvider();
-const auth = getAuth();
+export const auth = getAuth();
 
 provider.addScope("repo");
 
@@ -28,7 +29,16 @@ provider.setCustomParameters({
   allow_signup: "false",
 });
 
-export const signin = () => {
+auth.onAuthStateChanged((user: User | null) => {
+  if (user) {
+    console.log("FIREBASE USER SIGNED IN");
+  }
+});
+
+export const signinFirebase = async (githubAccessToken: string) => {
+  const credential = GithubAuthProvider.credential(githubAccessToken);
+  const user = await signInWithCredential(auth, credential);
+  /*  
   signInWithPopup(auth, provider)
     .then((result) => {
       // This gives you a GitHub Access Token. You can use it to access the GitHub API.
@@ -51,4 +61,5 @@ export const signin = () => {
       const credential = GithubAuthProvider.credentialFromError(error);
       // ...
     });
+    */
 };

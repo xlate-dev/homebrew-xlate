@@ -10,6 +10,9 @@ import * as util from "util";
 import * as api from "./api";
 import * as open from "open";
 import { XLateError } from "./error";
+import { LocalStorage } from "node-localstorage";
+
+const localStorage = new LocalStorage("./scratch");
 
 // The wire protocol for an access token returned by Google.
 // When we actually refresh from the server we should always have
@@ -120,8 +123,6 @@ async function loginWithLocalhost<ResultType>(
       logger.info(clc.bold.underline(authUrl));
       logger.info();
       logger.info("Waiting for authentication...");
-
-      console.log(authUrl);
       open(authUrl);
     });
 
@@ -154,15 +155,13 @@ async function getGithubTokensFromAuthorizationCode(
   const respText = await response.text();
   const parsedQuery = url.parse(`${callbackUrl}?${respText}`, true);
   return parsedQuery.query["access_token"] as string;
-  //const res: { body: GitHubAuthResponse } = await response.json();
-  //return res.body.access_token as string;
 }
 
 async function loginWithLocalhostGitHub(port: number): Promise<string> {
   const callbackUrl = getCallbackUrl(port);
   const authUrl = getGithubLoginUrl(callbackUrl);
   const successTemplate = "../templates/loginSuccessGithub.html";
-  const tokens = await loginWithLocalhost(
+  const token = await loginWithLocalhost(
     port,
     callbackUrl,
     authUrl,
@@ -170,10 +169,27 @@ async function loginWithLocalhostGitHub(port: number): Promise<string> {
     getGithubTokensFromAuthorizationCode
   );
   void track("login", "google_localhost");
-  return tokens;
+  return token;
 }
 
 export async function loginGithub(): Promise<string> {
   const port = await getPort();
   return loginWithLocalhostGitHub(port);
+}
+
+export async function loginGithubWithCachedKey(): Promise<string> {
+  const cached: string = localStorage.getItem(
+    "XLATE_loginGithubWithCachedKey"
+  ) as string;
+  if (cached) return cached;
+  const port = await getPort();
+  const newToken = await loginWithLocalhostGitHub(port);
+  if (newToken) {
+    localStorage.setItem("XLATE_loginGithubWithCachedKey", newToken);
+  }
+  return newToken;
+}
+
+export async function clearGithubWithCachedKey() {
+  localStorage.setItem("XLATE_loginGithubWithCachedKey", "");
 }

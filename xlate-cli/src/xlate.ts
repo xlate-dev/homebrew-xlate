@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { loginGithub } from "./auth";
-import { signin } from "./firebase";
+import { clearGithubWithCachedKey, loginGithubWithCachedKey } from "./auth";
+import { signinFirebase } from "./firebase";
 import { translate } from "./translate";
 import { pkg } from "./utils";
 const program = new Command();
@@ -23,10 +23,20 @@ program
 program
   .command("login")
   .description("login with github")
-  .action((str, options) => {
-    console.log("login");
-    loginGithub();
-    //signin();
+  .action(async (str, options) => {
+    const token = await loginGithubWithCachedKey();
+    try {
+      await signinFirebase(token);
+    } catch (e) {
+      clearGithubWithCachedKey();
+    }
+  });
+
+program
+  .command("logout")
+  .description("logout with github")
+  .action(async (str, options) => {
+    clearGithubWithCachedKey();
   });
 
 program.parse();
