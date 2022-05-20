@@ -7,6 +7,7 @@ import {
   auth,
   addTranslationDoc,
   updateTranslationDoc,
+  uploadFile,
 } from "./firebase";
 import { logger } from "./logger";
 const exec = promisify(require("child_process").exec);
@@ -47,6 +48,7 @@ export const translate = async (dir: string) => {
       languages: [],
     });
     const taskId: string = docRef.id;
+    logger.info(`task ${taskId} started`);
     logger.info(`analyzing ${projectName}`);
     await scanDir(xcodeprojDir, "project.pbxproj", async (pbxprojFile) => {
       const res = await exec(`plutil -convert json "${pbxprojFile}" -o -`);
@@ -84,15 +86,11 @@ export const translate = async (dir: string) => {
         );
         logger.info(tarCommand);
 
-        const ref = getStorageRef(relativeTgzPath);
-
-        const buf = fs.readFileSync(localTgzPath);
-
         await updateTranslationDoc(docRef, {
           status: "UPLOADING",
         });
 
-        const uploadResult = await uploadBytes(ref, buf);
+        const uploadResult = await uploadFile(localTgzPath, relativeTgzPath);
 
         logger.info("uploaded");
       } else {

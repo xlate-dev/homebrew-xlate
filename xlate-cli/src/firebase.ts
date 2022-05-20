@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -6,7 +7,7 @@ import {
   User,
   UserCredential,
 } from "firebase/auth";
-import { getStorage, ref } from "firebase/storage";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 import {
   getFirestore,
   addDoc,
@@ -36,6 +37,12 @@ export const firestore = getFirestore(app);
 
 export const getStorageRef = (path: string) => {
   return ref(storage, path);
+};
+
+export const uploadFile = async (localPath: string, remotePath: string) => {
+  const ref = getStorageRef(remotePath);
+  const buf = fs.readFileSync(localPath);
+  return await uploadBytes(ref, buf);
 };
 
 export const addTranslationDoc = async (doc: TranslationTask) => {
