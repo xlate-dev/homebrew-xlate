@@ -65,9 +65,11 @@ export const translate = async (dir: string) => {
       if (knownRegions.length) {
         const xlatePath = `xlate/${userId}/${taskId}/${projectName}`;
         const taskPath = `/tmp/${xlatePath}`;
+        const xclocsPath = `${taskPath}/xclocs`;
+        const zippedXclocs = `${taskPath}/zipped`;
         const commandStr = [
           `xcodebuild -exportLocalizations -project "${xcodeprojDir}"`,
-          `-localizationPath "${taskPath}"`,
+          `-localizationPath "${xclocsPath}"`,
           knownRegions.map((region) => `-exportLanguage ${region}`).join(" "),
         ].join(" ");
         logger.info(`exporting strings (.xcloc): ${knownRegions.join(" ")}`);
@@ -75,12 +77,14 @@ export const translate = async (dir: string) => {
           maxBuffer: 1024 * 1024 * 100,
         });
         logger.info(`Compressing .xlocs: ${knownRegions.join(" ")}`);
-        const tarCommand = await exec(`tar czvf ${taskPath}.tgz ${taskPath}/`);
+        const tarCommand = await exec(
+          `cd ${taskPath} && tar czvf ${zippedXclocs}.tgz xclocs`
+        );
         logger.info(tarCommand);
 
         const ref = getStorageRef(`${xlatePath}.tgz`);
 
-        const buf = fs.readFileSync(`${taskPath}.tgz`);
+        const buf = fs.readFileSync(`${zippedXclocs}.tgz`);
 
         await updateTranslationDoc(docRef, {
           status: "UPLOADING",
