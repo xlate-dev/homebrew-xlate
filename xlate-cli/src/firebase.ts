@@ -7,7 +7,15 @@ import {
   UserCredential,
 } from "firebase/auth";
 import { getStorage, ref } from "firebase/storage";
+import {
+  getFirestore,
+  addDoc,
+  collection,
+  updateDoc,
+  DocumentReference,
+} from "firebase/firestore";
 import { logger } from "./logger";
+import { TranslationTask } from "./shared/xlate";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB91QOsFjrDJuTEZzrWun27FOHzUjCSofA",
@@ -24,9 +32,21 @@ export const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+export const firestore = getFirestore(app);
 
 export const getStorageRef = (path: string) => {
   return ref(storage, path);
+};
+
+export const addTranslationDoc = async (doc: TranslationTask) => {
+  return await addDoc(collection(firestore, "translateTasks"), doc);
+};
+
+export const updateTranslationDoc = async (
+  ref: DocumentReference<Partial<TranslationTask>>,
+  data: Partial<TranslationTask>
+) => {
+  return await updateDoc(ref, data);
 };
 
 auth.onAuthStateChanged(async (user: User | null) => {
