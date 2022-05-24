@@ -26,3 +26,4 @@ export function envOverride(
 }
 
 export const pkg = require("../package.json");
+export const homedir = require("os").homedir();

@@ -1,15 +1,15 @@
-import { uploadBytes } from "firebase/storage";
 import * as fs from "fs";
 import * as path from "path";
+import * as tar from "tar";
+import { nanoid } from "nanoid";
 import { promisify } from "util";
-import {
-  getStorageRef,
-  auth,
-  addTranslationDoc,
-  updateTranslationDoc,
-  uploadFile,
-} from "./firebase";
+import { auth, uploadFile } from "./firebase";
 import { logger } from "./logger";
+import { homedir } from "./utils";
+import * as stream from "stream";
+
+const pipeline = promisify(stream.pipeline);
+
 const exec = promisify(require("child_process").exec);
 
 async function scanDir(
@@ -39,15 +39,7 @@ export const translate = async (dir: string) => {
   await scanDir(dir, ".xcodeproj", async (xcodeprojDir) => {
     const projectName = path.basename(xcodeprojDir, ".xcodeproj");
     const userId = auth.currentUser?.uid;
-    const docRef = await addTranslationDoc({
-      whenStarted: Date.now(),
-      status: "PARSING",
-      client: userId ?? "",
-      project: projectName,
-      uniqueStrings: [],
-      languages: [],
-    });
-    const taskId: string = docRef.id;
+    const taskId: string = nanoid();
     logger.info(`task ${taskId} started`);
     logger.info(`analyzing ${projectName}`);
     await scanDir(xcodeprojDir, "project.pbxproj", async (pbxprojFile) => {
@@ -65,12 +57,13 @@ export const translate = async (dir: string) => {
       });
       // knownRegions = knownRegions.filter((r) => r === "Base");
       if (knownRegions.length) {
+        const localPrefix = `${homedir}/.xlate/data`;
         const relativeTaskPath = `xlate/${userId}/${taskId}`;
         const relativeXlocsPath = `${relativeTaskPath}/xclocs`;
         const relativeTgzPath = `${relativeXlocsPath}.tgz`;
-        const localTaskPath = `/tmp/${relativeTaskPath}`;
-        const localXlocsPath = `/tmp/${relativeXlocsPath}`;
-        const localTgzPath = `/tmp/${relativeTgzPath}`;
+        const localTaskPath = `${localPrefix}/${relativeTaskPath}`;
+        const localXlocsPath = `${localPrefix}/${relativeXlocsPath}`;
+        const localTgzPath = `${localPrefix}/${relativeTgzPath}`;
         const commandStr = [
           `xcodebuild -exportLocalizations -project "${xcodeprojDir}"`,
           `-localizationPath "${localXlocsPath}"`,
@@ -80,17 +73,17 @@ export const translate = async (dir: string) => {
         const commandResult = await exec(commandStr, {
           maxBuffer: 1024 * 1024 * 100,
         });
-        logger.info(`Compressing .xclocs: ${knownRegions.join(" ")}`);
-        const tarCommand = await exec(
-          `cd ${localTaskPath} && tar czvf ${localTgzPath} xclocs`
+
+        await pipeline(
+          tar.c({ gzip: true, cwd: localXlocsPath }, ["."]),
+          fs.createWriteStream(localTgzPath)
         );
-        logger.info(tarCommand);
 
-        await updateTranslationDoc(docRef, {
-          status: "UPLOADING",
-        });
-
-        const uploadResult = await uploadFile(localTgzPath, relativeTgzPath);
+        const uploadResult = await uploadFile(
+          localTgzPath,
+          relativeTgzPath,
+          projectName
+        );
 
         logger.info("uploaded");
       } else {

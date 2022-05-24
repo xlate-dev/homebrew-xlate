@@ -11,8 +11,9 @@ import * as api from "./api";
 import * as open from "open";
 import { XLateError } from "./error";
 import { LocalStorage } from "node-localstorage";
+import { homedir } from "./utils";
 
-const localStorage = new LocalStorage("./scratch");
+const localStorage = new LocalStorage(`${homedir}/.xlate/storage`);
 
 // The wire protocol for an access token returned by Google.
 // When we actually refresh from the server we should always have

@@ -6,16 +6,15 @@ export type TranslationTaskStatus =
   | "ERROR";
 
 export interface TranslationTask {
+  id: string;
   whenStarted: number;
   status: TranslationTaskStatus;
   client: string;
   project: string;
-  uniqueStrings: string[];
+  uniqueStrings: string;
   languages: string[];
-  /*
-    total_target_strings;
-    existing_target_strings;
-    strings_to_xlate;
-    strings_xlated;
-    */
+  totalTargetStrings: string;
+  existingTargetStrings: string;
+  stringsToXlate: string;
+  stringsXlated: string;
 }

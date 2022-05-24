@@ -39,10 +39,24 @@ export const getStorageRef = (path: string) => {
   return ref(storage, path);
 };
 
-export const uploadFile = async (localPath: string, remotePath: string) => {
+export const uploadFile = async (
+  localPath: string,
+  remotePath: string,
+  project: string | undefined = undefined
+) => {
   const ref = getStorageRef(remotePath);
   const buf = fs.readFileSync(localPath);
-  return await uploadBytes(ref, buf);
+  return await uploadBytes(
+    ref,
+    buf,
+    project
+      ? {
+          customMetadata: {
+            project: project,
+          },
+        }
+      : undefined
+  );
 };
 
 export const addTranslationDoc = async (doc: TranslationTask) => {
