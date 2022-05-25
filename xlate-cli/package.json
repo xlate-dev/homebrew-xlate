@@ -16,7 +16,7 @@
     "xlate"
   ],
   "author": "xlate.dev",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "cli-color": "^2.0.2",
     "commander": "^9.2.0",
