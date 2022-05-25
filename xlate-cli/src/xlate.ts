@@ -6,27 +6,38 @@ import { translate } from "./translate";
 import { pkg } from "./utils";
 const program = new Command();
 
+const translateAction = async (str: string, options: any) => {
+  const token = await loginGithubWithCachedKey();
+  try {
+    const user = await signinFirebase(token);
+    if (user) {
+      let dir = "";
+      const cwd = process.cwd();
+
+      if (typeof str === "string") {
+        dir = str ?? cwd;
+      } else {
+        dir = cwd;
+      }
+      translate(dir);
+    }
+  } catch (e) {
+    console.error(e);
+    clearGithubWithCachedKey();
+  }
+};
+
 program
   .name("xlate")
   .description("CLI to xlate translation tools")
-  .version(pkg.version);
+  .version(pkg.version)
+  .action(translateAction);
 
 program
   .command("translate")
   .description("translate iOS project")
   .argument("[path]", "project path")
-  .action(async (str, options) => {
-    const token = await loginGithubWithCachedKey();
-    try {
-      const user = await signinFirebase(token);
-      if (user) {
-        const dir = str ?? process.cwd();
-        translate(dir);
-      }
-    } catch (e) {
-      clearGithubWithCachedKey();
-    }
-  });
+  .action(translateAction);
 
 program
   .command("login")

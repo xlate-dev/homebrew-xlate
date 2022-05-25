@@ -12,6 +12,11 @@ import * as open from "open";
 import { XLateError } from "./error";
 import { LocalStorage } from "node-localstorage";
 import { homedir } from "./utils";
+import { getXlateDevOrigin, isSimulator } from "./firebase";
+
+const localStorageKey = `XLATE_${
+  isSimulator ? "SIM_" : ""
+}loginGithubWithCachedKey`;
 
 const localStorage = new LocalStorage(`${homedir}/.xlate/storage`);
 
@@ -137,7 +142,7 @@ async function getGithubTokensFromAuthorizationCode(
   code: string,
   callbackUrl: string
 ) {
-  const response = await api.request(`${api.xlateDevOrigin}/login`, {
+  const response = await api.request(`${getXlateDevOrigin()}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -172,20 +177,18 @@ export async function loginGithub(): Promise<string> {
 }
 
 export async function loginGithubWithCachedKey(): Promise<string> {
-  const cached: string = localStorage.getItem(
-    "XLATE_loginGithubWithCachedKey"
-  ) as string;
+  const cached: string = localStorage.getItem(localStorageKey) as string;
   if (cached) return cached;
   const port = await getPort();
   const newToken = await loginWithLocalhostGitHub(port);
   if (newToken) {
-    localStorage.setItem("XLATE_loginGithubWithCachedKey", newToken);
+    localStorage.setItem(localStorageKey, newToken);
   }
   return newToken;
 }
 export function setGithubWithCachedKey(newToken: string) {
-  localStorage.setItem("XLATE_loginGithubWithCachedKey", newToken);
+  localStorage.setItem(localStorageKey, newToken);
 }
 export function clearGithubWithCachedKey() {
-  localStorage.setItem("XLATE_loginGithubWithCachedKey", "");
+  localStorage.setItem(localStorageKey, "");
 }

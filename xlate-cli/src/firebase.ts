@@ -1,22 +1,39 @@
 import * as fs from "fs";
 import { initializeApp } from "firebase/app";
 import {
+  connectAuthEmulator,
   getAuth,
   GithubAuthProvider,
+  GoogleAuthProvider,
   signInWithCredential,
   User,
   UserCredential,
 } from "firebase/auth";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import {
+  connectStorageEmulator,
+  getStorage,
+  ref,
+  uploadBytes,
+  getStream,
+} from "firebase/storage";
 import {
   getFirestore,
   addDoc,
   collection,
   updateDoc,
   DocumentReference,
+  DocumentData,
+  Unsubscribe as FirestoreUnsubscribe,
+  query,
+  where,
+  QuerySnapshot,
+  connectFirestoreEmulator,
 } from "firebase/firestore";
+import { onSnapshot } from "firebase/firestore";
+
 import { logger } from "./logger";
 import { TranslationTask } from "./shared/xlate";
+import { xlateDevOrigin } from "./api";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB91QOsFjrDJuTEZzrWun27FOHzUjCSofA",
@@ -35,9 +52,25 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const firestore = getFirestore(app);
 
+export const isSimulator = false;
+
+if (isSimulator) {
+  connectAuthEmulator(auth, "http://localhost:9099");
+  connectFirestoreEmulator(firestore, "localhost", 8080);
+  connectStorageEmulator(storage, "localhost", 9199);
+}
+
+export const getXlateDevOrigin = () => {
+  if (isSimulator) {
+    return "http://localhost:5002";
+  } else return xlateDevOrigin;
+};
+
 export const getStorageRef = (path: string) => {
   return ref(storage, path);
 };
+
+export const getBucketStream = getStream;
 
 export const uploadFile = async (
   localPath: string,
@@ -70,16 +103,36 @@ export const updateTranslationDoc = async (
   return await updateDoc(ref, data);
 };
 
+export const listenToTask = (
+  id: string,
+  client: string,
+  onSnap: (querySnapshot: QuerySnapshot<DocumentData>) => void
+): FirestoreUnsubscribe => {
+  const q = query(
+    collection(firestore, "translateTasks"),
+    where("client", "==", client),
+    where("id", "==", id)
+  );
+  const unsub = onSnapshot(q, (querySnapshot) => {
+    onSnap(querySnapshot);
+  });
+  return unsub;
+};
+
 auth.onAuthStateChanged(async (user: User | null) => {
   if (user) {
-    logger.info("FIREBASE USER SIGNED IN");
+    logger.info("User authorized");
   }
 });
 
 export const signinFirebase = async (
   githubAccessToken: string
 ): Promise<UserCredential> => {
-  const credential = GithubAuthProvider.credential(githubAccessToken);
+  const credential = isSimulator
+    ? GoogleAuthProvider.credential(
+        '{"sub": "abc123", "email": "foo@example.com", "email_verified": true}'
+      )
+    : GithubAuthProvider.credential(githubAccessToken);
   const user = await signInWithCredential(auth, credential);
   return user;
   //ToDo implement refreshtoken

@@ -11,7 +11,7 @@ export interface TranslationTask {
   status: TranslationTaskStatus;
   client: string;
   project: string;
-  uniqueStrings: string;
+  uniqueStrings: number;
   languages: string[];
   totalTargetStrings: string;
   existingTargetStrings: string;
