@@ -42,6 +42,7 @@ async function scanDir(
 }
 
 export const translate = async (dir: string) => {
+  const start = Date.now();
   logger.info("looking for an .xcodeproj...");
   await scanDir(dir, ".xcodeproj", async (xcodeprojDir) => {
     const projectName = path.basename(xcodeprojDir, ".xcodeproj");
@@ -129,6 +130,11 @@ export const translate = async (dir: string) => {
                   });
                 });
                 logger.info("copmpleted");
+                console.log(
+                  `Time Taken to execute = ${
+                    (Date.now() - start) / 1000
+                  } seconds`
+                );
                 process.exit(1);
               }
             }
