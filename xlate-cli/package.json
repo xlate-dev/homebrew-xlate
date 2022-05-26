@@ -20,6 +20,7 @@
     "npm": ">=8.5.5"
   },
   "author": "xlate.dev",
+  "homepage": "https://xlate.dev/",
   "license": "MIT",
   "dependencies": {
     "cli-color": "^2.0.2",
