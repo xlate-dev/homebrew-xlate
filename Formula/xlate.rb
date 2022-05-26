@@ -22,4 +22,3 @@ class Xlate < Formula
     assert_match "0.1.1", shell_output("#{bin}/xlate --version")
   end
 end
-
