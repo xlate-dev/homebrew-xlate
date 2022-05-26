@@ -1,6 +1,6 @@
 # xlate
 
-One command to translate your iOS project to multiple target locales!
+One command to translate your iOS project to multiple target locales; just run "xlate".
 
 To install use either:
 
