@@ -1,11 +1,24 @@
-# macos-client
-CLI to XLate translation tools
+# xlate
+
+One command to translate your iOS project to multiple target locales!
+
+To install use either:
+
+```
+npm install -g xlate
+```
+
+_or_
+
+```
+brew install xlate-dev/xlate
+```
 
 Options:
-  -V, --version     output the version number
-  -h, --help        display help for command
+-V, --version _output the version number_
+-h, --help _display help for command_
 
 Commands:
-  translate [path]  translate ios project
-  login             login with github
-  help [command]    display help for command
+translate [path] _translate ios project_
+login _login with github_
+help [command] _display help for command_
