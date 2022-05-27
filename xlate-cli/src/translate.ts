@@ -118,6 +118,7 @@ export const translate = async (dir: string) => {
                     C: localTranslatedPath,
                   })
                 );
+
                 logger.info("Translations downloaded. importing...");
 
                 await scanDir(localTranslatedPath, ".xcloc", async (dir) => {
@@ -130,7 +131,7 @@ export const translate = async (dir: string) => {
                   });
                 });
                 logger.info("copmpleted");
-                console.log(
+                logger.info(
                   `Time Taken to execute = ${
                     (Date.now() - start) / 1000
                   } seconds`
