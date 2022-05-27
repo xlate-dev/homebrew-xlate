@@ -3,8 +3,8 @@ require "language/node"
 class Xlate < Formula
   desc "Translate your XCode project into multiple target languages with one command!"
   homepage "https://xlate.dev/"
-  url "https://registry.npmjs.org/xlate/-/xlate-0.1.1.tgz"
-  sha256 "e7416477cd0821670c7f15acfe050a884b9e94ed9d2f24cba8b1cab182f1336f"
+  url "https://registry.npmjs.org/xlate/-/xlate-0.1.2.tgz"
+  sha256 "602e7443f7c15ab57a1c01cbc575ee286ff4fae73ab7e831724aa0c13d6c0726"
   license "MIT"
 
   livecheck do
