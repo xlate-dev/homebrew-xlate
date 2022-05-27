@@ -7,6 +7,7 @@ import { pkg } from "./utils";
 const program = new Command();
 
 const translateAction = async (str: string, options: any) => {
+  const args = options.args;
   const token = await loginGithubWithCachedKey();
   try {
     const user = await signinFirebase(token);
@@ -19,7 +20,7 @@ const translateAction = async (str: string, options: any) => {
       } else {
         dir = cwd;
       }
-      translate(dir);
+      translate(dir, args);
     }
   } catch (e) {
     console.error(e);
@@ -31,6 +32,8 @@ program
   .name("xlate")
   .description("CLI to xlate translation tools")
   .version(pkg.version)
+  .option("-l")
+  .parse(process.argv)
   .action(translateAction);
 
 program

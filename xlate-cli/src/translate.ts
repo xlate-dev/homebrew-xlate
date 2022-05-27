@@ -41,7 +41,7 @@ async function scanDir(
   }
 }
 
-export const translate = async (dir: string) => {
+export const translate = async (dir: string, args: string[]) => {
   const start = Date.now();
   logger.info("looking for an .xcodeproj...");
   await scanDir(dir, ".xcodeproj", async (xcodeprojDir) => {
@@ -56,13 +56,18 @@ export const translate = async (dir: string) => {
       const objects: any = resJSON["objects"];
       const keys: string[] = Object.keys(objects);
       let knownRegions: string[] = [];
-      keys.forEach((k) => {
-        const entry: any = objects[k];
-        const regions = entry["knownRegions"];
-        if (regions && Array.isArray(regions)) {
-          knownRegions = knownRegions.concat(regions);
-        }
-      });
+      if (args && Array.isArray(args) && args.length > 0) {
+        knownRegions = args;
+      } else {
+        keys.forEach((k) => {
+          const entry: any = objects[k];
+          const regions = entry["knownRegions"];
+          if (regions && Array.isArray(regions)) {
+            knownRegions = knownRegions.concat(regions);
+          }
+        });
+      }
+
       // knownRegions = knownRegions.filter((r) => r === "Base");
       if (knownRegions.length) {
         const localPrefix = `${homedir}/.xlate/data`;
