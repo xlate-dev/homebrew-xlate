@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv";
+dotenv.config({ path: `${__dirname}/../.env` });
+
 import * as fs from "fs";
 import { initializeApp } from "firebase/app";
 import {
@@ -52,7 +55,9 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const firestore = getFirestore(app);
 
-export const isSimulator = false;
+const { IS_SIMULATOR } = process.env;
+
+export const isSimulator = IS_SIMULATOR === "true";
 
 if (isSimulator) {
   connectAuthEmulator(auth, "http://localhost:9099");
