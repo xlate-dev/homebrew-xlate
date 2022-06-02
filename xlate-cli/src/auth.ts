@@ -41,7 +41,7 @@ interface GitHubAuthResponse {
 const _nonce = Math.floor(Math.random() * (2 << 29) + 1).toString();
 const getPort = portfinder.getPortPromise;
 
-const GITHUB_SCOPES = ["read:user", "repo", "public_repo"];
+const GITHUB_SCOPES = ["read:user"];
 
 function getCallbackUrl(port?: number): string {
   if (typeof port === "undefined") {
