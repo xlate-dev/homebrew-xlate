@@ -85,6 +85,7 @@ export const translate = async (dir: string, args: string[]) => {
           `-localizationPath "${localXlocsPath}"`,
           knownRegions.map((region) => `-exportLanguage ${region}`).join(" "),
         ].join(" ");
+        logger.debug(commandStr);
         logger.info(`exporting strings (.xcloc): ${knownRegions.join(" ")}`);
         const commandResult = await exec(commandStr, {
           maxBuffer: 1024 * 1024 * 100,
@@ -110,32 +111,46 @@ export const translate = async (dir: string, args: string[]) => {
             if (change.type === "modified") {
               logger.info(`task status: ${doc.status}`);
               if (doc.status === "COMPLETE") {
-                const ref = getStorageRef(relativeTranslatedTgz);
-                const stream = getBucketStream(ref);
+                if (doc.languages && doc.languages.length > 0) {
+                  logger.info(`translations: ${doc.languages.join(", ")}`);
+                  const ref = getStorageRef(relativeTranslatedTgz);
+                  const stream = getBucketStream(ref);
 
-                if (!fs.existsSync(localTranslatedPath)) {
-                  fs.mkdirSync(localTranslatedPath, { recursive: true });
+                  if (!fs.existsSync(localTranslatedPath)) {
+                    fs.mkdirSync(localTranslatedPath, { recursive: true });
+                  }
+
+                  await pipeline(
+                    stream,
+                    tar.x({
+                      C: localTranslatedPath,
+                    })
+                  );
+
+                  logger.info("Translations downloaded. importing...");
+
+                  for (const l of doc.languages) {
+                    await scanDir(
+                      localTranslatedPath,
+                      `${l}.xcloc`,
+                      async (dir) => {
+                        logger.info(`importing: ${path.basename(dir)}`);
+
+                        const importCommandStr = `xcodebuild -importLocalizations -localizationPath "${dir}" -project "${xcodeprojDir}"`;
+                        logger.debug(importCommandStr);
+                        const importCommandResult = await exec(
+                          importCommandStr,
+                          {
+                            maxBuffer: 1024 * 1024 * 100,
+                          }
+                        );
+                      }
+                    );
+                  }
+                } else {
+                  logger.info("nothing translated");
                 }
-
-                await pipeline(
-                  stream,
-                  tar.x({
-                    C: localTranslatedPath,
-                  })
-                );
-
-                logger.info("Translations downloaded. importing...");
-
-                await scanDir(localTranslatedPath, ".xcloc", async (dir) => {
-                  logger.info(`importing: ${path.basename(dir)}`);
-
-                  const importCommandStr = `xcodebuild -importLocalizations -localizationPath "${dir}" -project "${xcodeprojDir}"`;
-
-                  const importCommandResult = await exec(importCommandStr, {
-                    maxBuffer: 1024 * 1024 * 100,
-                  });
-                });
-                logger.info("copmpleted");
+                logger.info("completed");
                 logger.info(
                   `Time Taken to execute = ${
                     (Date.now() - start) / 1000
