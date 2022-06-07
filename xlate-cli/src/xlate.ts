@@ -6,23 +6,17 @@ import { signinFirebase } from "./firebase.js";
 import { pkg } from "./pkg.js";
 //import { requireAuth } from "./requireAuth.js";
 import { translate } from "./translate.js";
+
 const program = new Command();
 
-const translateAction = async (str: string, options: any) => {
-  //requireAuth(options);
-  const args = options.args;
+const translateAction = async (_: any, command: Command) => {
+  //requireAuth(command);
+  const args = command.args;
   const token = await loginGithubWithCachedKey();
   try {
     const user = await signinFirebase(token);
     if (user) {
-      let dir = "";
-      const cwd = process.cwd();
-
-      if (typeof str === "string") {
-        dir = str ?? cwd;
-      } else {
-        dir = cwd;
-      }
+      const dir = process.cwd();
       translate(dir, args);
     }
   } catch (e) {
@@ -30,6 +24,8 @@ const translateAction = async (str: string, options: any) => {
     clearGithubWithCachedKey();
   }
 };
+
+program.option("-tk, --token [token]", "ci token");
 
 program
   .name("xlate")
@@ -39,15 +35,9 @@ program
   .action(translateAction);
 
 program
-  .command("translate")
-  .description("translate iOS project")
-  .argument("[path]", "project path")
-  .action(translateAction);
-
-program
   .command("login")
   .description("login with GitHub")
-  .action(async (str, options) => {
+  .action(async () => {
     const token = await loginGithubWithCachedKey();
     try {
       const cred = await signinFirebase(token);
@@ -59,7 +49,7 @@ program
 program
   .command("logout")
   .description("logout with GitHub")
-  .action(async (str, options) => {
+  .action(async () => {
     clearGithubWithCachedKey();
   });
 

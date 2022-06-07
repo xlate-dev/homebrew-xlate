@@ -18,7 +18,7 @@ export default function (error: XLateError) {
     });
   } else {
     if (error.original) {
-      logger.debug(error.original.stack);
+      logger.error(error.original.stack);
     }
     logger.error([clc.bold.red("Error:"), error.message].join(" "));
   }
