@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { clearGithubWithCachedKey, loginGithubWithCachedKey } from "./auth.js";
+import { errorOut } from "./errorOut.js";
 import { signinFirebase } from "./firebase.js";
 import { pkg } from "./pkg.js";
+//import { requireAuth } from "./requireAuth.js";
 import { translate } from "./translate.js";
 const program = new Command();
 
 const translateAction = async (str: string, options: any) => {
+  //requireAuth(options);
   const args = options.args;
   const token = await loginGithubWithCachedKey();
   try {
@@ -32,7 +35,6 @@ program
   .name("xlate")
   .description("CLI to xlate translation tools")
   .version(pkg.version)
-  .option("-l")
   .parse(process.argv)
   .action(translateAction);
 
@@ -62,3 +64,7 @@ program
   });
 
 program.parse();
+
+process.on("uncaughtException", function (err) {
+  errorOut(err);
+});

@@ -84,7 +84,14 @@ const rawLogger = winston.createLogger();
 // Set a default silent logger to suppress logs during tests
 rawLogger.add(
   new winston.transports.Console({
-    /*silent: true, */ format: winston.format.simple(),
+    /*silent: true, */
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.printf((info) => {
+        // return `${info.level}: ${info.message}`;
+        return `${info.message}`;
+      })
+    ),
   })
 );
 rawLogger.exitOnError = false;
