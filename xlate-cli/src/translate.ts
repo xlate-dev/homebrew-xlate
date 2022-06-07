@@ -9,15 +9,16 @@ import {
   getStorageRef,
   listenToTask,
   uploadFile,
-} from "./firebase";
-import { logger } from "./logger";
-import { homedir } from "./utils";
+} from "./firebase.js";
+import { logger } from "./logger.js";
+import { homedir } from "./utils.js";
 import * as stream from "stream";
-import { TranslationTask } from "./shared/xlate";
+import { TranslationTask } from "./shared/xlate.js";
+import child_process from "child_process";
 
 const pipeline = promisify(stream.pipeline);
 
-const exec = promisify(require("child_process").exec);
+const exec = promisify(child_process.exec);
 
 async function scanDir(
   startPath: string,

@@ -1,5 +1,5 @@
 import fetch from "cross-fetch";
-import * as utils from "./utils";
+import * as utils from "./utils.js";
 
 export const githubOrigin = utils.envOverride(
   "GITHUB_URL",

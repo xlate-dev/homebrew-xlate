@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { clearGithubWithCachedKey, loginGithubWithCachedKey } from "./auth";
-import { signinFirebase } from "./firebase";
-import { translate } from "./translate";
-import { pkg } from "./utils";
+import { clearGithubWithCachedKey, loginGithubWithCachedKey } from "./auth.js";
+import { signinFirebase } from "./firebase.js";
+import { pkg } from "./pkg.js";
+import { translate } from "./translate.js";
 const program = new Command();
 
 const translateAction = async (str: string, options: any) => {
@@ -48,7 +48,7 @@ program
   .action(async (str, options) => {
     const token = await loginGithubWithCachedKey();
     try {
-      await signinFirebase(token);
+      const cred = await signinFirebase(token);
     } catch (e) {
       clearGithubWithCachedKey();
     }

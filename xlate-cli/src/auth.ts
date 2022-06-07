@@ -1,24 +1,45 @@
-import * as clc from "cli-color";
-import * as portfinder from "portfinder";
-import { track } from "./track";
-import * as fs from "fs";
-import * as http from "http";
-import { logger } from "./logger";
-import * as path from "path";
-import * as url from "url";
-import * as util from "util";
-import * as api from "./api";
-import * as open from "open";
-import { XLateError } from "./error";
+import clc from "cli-color";
+import portfinder from "portfinder";
+import { track } from "./track.js";
+import fs from "fs";
+import http from "http";
+import { logger } from "./logger.js";
+import path from "path";
+import url from "url";
+import util from "util";
+import * as api from "./api.js";
+import open from "open";
+import { XLateError } from "./error.js";
 import { LocalStorage } from "node-localstorage";
-import { homedir } from "./utils";
-import { getXlateDevOrigin, isSimulator } from "./firebase";
+import { homedir } from "./utils.js";
+import { getXlateDevOrigin, isSimulator } from "./firebase.js";
+import { configstore } from "./configstore.js";
+import { getDirname } from "./pkg.js";
 
 const localStorageKey = `XLATE_${
   isSimulator ? "SIM_" : ""
 }loginGithubWithCachedKey`;
 
 const localStorage = new LocalStorage(`${homedir}/.xlate/storage`);
+
+export interface User {
+  email: string;
+
+  iss?: string;
+  azp?: string;
+  aud?: string;
+  sub?: number;
+  hd?: string;
+  email_verified?: boolean;
+  at_hash?: string;
+  iat?: number;
+  exp?: number;
+}
+
+export interface Account {
+  user: User;
+  tokens: Tokens;
+}
 
 // The wire protocol for an access token returned by Google.
 // When we actually refresh from the server we should always have
@@ -80,7 +101,7 @@ async function respondWithFile(
   filename: string
 ) {
   const response = await util.promisify(fs.readFile)(
-    path.join(__dirname, filename)
+    path.join(getDirname(), filename)
   );
   res.writeHead(statusCode, {
     "Content-Length": response.length,
@@ -186,6 +207,23 @@ export async function loginGithubWithCachedKey(): Promise<string> {
   }
   return newToken;
 }
+
+export function getGlobalDefaultAccount(): Account | undefined {
+  const user = configstore.get("user") as User | undefined;
+  const tokens = configstore.get("tokens") as Tokens | undefined;
+
+  // TODO: Is there ever a case where only User or Tokens is defined
+  //       and we want to accept that?
+  if (!user || !tokens) {
+    return undefined;
+  }
+
+  return {
+    user,
+    tokens,
+  };
+}
+
 export function setGithubWithCachedKey(newToken: string) {
   localStorage.setItem(localStorageKey, newToken);
 }

@@ -1,3 +1,4 @@
+import os from "os";
 export const envOverrides: string[] = [];
 
 /**
@@ -25,5 +26,4 @@ export function envOverride(
   return value;
 }
 
-export const pkg = require("../package.json");
-export const homedir = require("os").homedir();
+export const homedir = os.homedir();

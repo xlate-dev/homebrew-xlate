@@ -1,6 +1,3 @@
-import * as dotenv from "dotenv";
-dotenv.config({ path: `${__dirname}/../.env` });
-
 import * as fs from "fs";
 import { initializeApp } from "firebase/app";
 import {
@@ -34,9 +31,9 @@ import {
 } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
 
-import { logger } from "./logger";
-import { TranslationTask } from "./shared/xlate";
-import { xlateDevOrigin } from "./api";
+import { logger } from "./logger.js";
+import { TranslationTask } from "./shared/xlate.js";
+import { xlateDevOrigin } from "./api.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB91QOsFjrDJuTEZzrWun27FOHzUjCSofA",
@@ -126,7 +123,7 @@ export const listenToTask = (
 
 auth.onAuthStateChanged(async (user: User | null) => {
   if (user) {
-    logger.info("User authorized");
+    logger.info("User authorized", user);
   }
 });
 
