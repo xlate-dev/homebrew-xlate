@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 import clc from "cli-color";
 import { Command } from "commander";
+import { signInWithCustomToken } from "firebase/auth";
 import { loginGithub } from "./auth.js";
 import { configstore } from "./configstore.js";
 import { XLateError } from "./error.js";
 import { errorOut } from "./errorOut.js";
-import { signinFirebase, signinFirebaseWithConfigstore } from "./firebase.js";
+import {
+  signinWithConfigstore,
+  signinWithGithubToken,
+  signinWithRefreshToken,
+} from "./firebase.js";
+import { logger } from "./logger.js";
 import { pkg } from "./pkg.js";
 import { translate } from "./translate.js";
 
@@ -17,7 +23,11 @@ const AUTH_ERROR_MESSAGE = `Command requires authentication, please run ${clc.bo
 
 const translateAction = async (_: any, command: Command) => {
   const args = command.args;
-  const user = await signinFirebaseWithConfigstore();
+  const opts = command.opts();
+  const { token } = opts;
+  const user = token
+    ? await signinWithRefreshToken(token)
+    : await signinWithConfigstore();
   if (user) {
     const dir = process.cwd();
     translate(dir, args);
@@ -26,7 +36,7 @@ const translateAction = async (_: any, command: Command) => {
   }
 };
 
-program.option("-tk, --token [token]", "ci token");
+program.option("--token [token]", "ci token");
 
 program
   .name("xlate")
@@ -39,11 +49,27 @@ program
   .command("login")
   .description("login with GitHub")
   .action(async () => {
-    const user = await signinFirebaseWithConfigstore();
+    const user = await signinWithConfigstore();
     if (!user) {
       const token = await loginGithub();
-      await signinFirebase(token);
+      const user = await signinWithGithubToken(token);
+      configstore.set("user", user.toJSON());
     }
+  });
+
+program
+  .command("login:ci")
+  .description(
+    "generate an access token for use in non-interactive environments"
+  )
+  .action(async () => {
+    const token = await loginGithub();
+    const user = await signinWithGithubToken(token);
+    logger.info(
+      "Success! Use this token to login on a CI server:\n\n" +
+        clc.bold(user.refreshToken) +
+        '\n\nExample: xlate en --token "$XLATE_TOKEN"\n'
+    );
   });
 
 program

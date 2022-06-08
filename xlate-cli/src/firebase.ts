@@ -126,7 +126,7 @@ auth.onAuthStateChanged(async (user: User | null) => {
   }
 });
 
-export const signinFirebase = async (
+export const signinWithGithubToken = async (
   githubAccessToken: string
 ): Promise<User> => {
   const credential = isSimulator
@@ -141,24 +141,17 @@ export const signinFirebase = async (
     : GithubAuthProvider.credential(githubAccessToken);
   const userCred = await signInWithCredential(auth, credential);
   const user = userCred.user;
-  configstore.set("user", user.toJSON());
   return user;
-  //ToDo implement refreshtoken
 };
 
-export const signinFirebaseWithConfigstore = async () => {
-  const u = configstore.get("user");
-  if (!(u && u.stsTokenManager && u.stsTokenManager.refreshToken)) {
-    return;
-  }
-
+export const signinWithRefreshToken = async (refreshToken: string) => {
   const response = await request(`${getXlateDevOrigin()}/custom_token`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      refresh_token: u.stsTokenManager.refreshToken,
+      refresh_token: refreshToken,
     }),
   });
   const respJson: { custom_token: string } = await response.json();
@@ -166,4 +159,13 @@ export const signinFirebaseWithConfigstore = async () => {
   const userCred = await signInWithCustomToken(auth, respJson.custom_token);
   const user = userCred.user;
   return user;
+};
+
+export const signinWithConfigstore = async () => {
+  const u = configstore.get("user");
+  if (!(u && u.stsTokenManager && u.stsTokenManager.refreshToken)) {
+    return;
+  }
+
+  return await signinWithRefreshToken(u.stsTokenManager.refreshToken);
 };
