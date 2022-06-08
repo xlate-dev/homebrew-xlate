@@ -1,9 +1,9 @@
 import * as dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
+import * as path from "path";
+//import { fileURLToPath } from "url";
 import * as fs from "fs";
 
-export const getFilename = () => fileURLToPath(import.meta.url);
+export const getFilename = () => __filename; //fileURLToPath(import.meta.url);
 export const getDirname = () => path.dirname(getFilename());
 
 dotenv.config({ path: `${getDirname()}/../.env` });

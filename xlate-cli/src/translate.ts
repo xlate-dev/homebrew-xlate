@@ -9,12 +9,12 @@ import {
   getStorageRef,
   listenToTask,
   uploadFile,
-} from "./firebase.js";
-import { logger } from "./logger.js";
-import { tempdir } from "./utils.js";
+} from "./firebase";
+import { logger } from "./logger";
+import { tempdir } from "./utils";
 import * as stream from "stream";
-import { TranslationTask } from "./shared/xlate.js";
-import child_process from "child_process";
+import { TranslationTask } from "./shared/xlate";
+import * as child_process from "child_process";
 
 const pipeline = promisify(stream.pipeline);
 

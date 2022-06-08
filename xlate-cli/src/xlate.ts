@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-import clc from "cli-color";
+import * as clc from "cli-color";
 import { Command, OptionValues } from "commander";
-import { loginGithub } from "./auth.js";
-import { configstore } from "./configstore.js";
-import { XLateError } from "./error.js";
-import { errorOut } from "./errorOut.js";
+import { loginGithub } from "./auth";
+import { configstore } from "./configstore";
+import { XLateError } from "./error";
+import { errorOut } from "./errorOut";
 import {
   signinWithConfigstore,
   signinWithGithubToken,
   signinWithRefreshToken,
-} from "./firebase.js";
-import { logger } from "./logger.js";
-import { pkg } from "./pkg.js";
-import { translate } from "./translate.js";
+} from "./firebase";
+import { logger } from "./logger";
+import { pkg } from "./pkg";
+import { translate } from "./translate";
 
 const program = new Command();
 

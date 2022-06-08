@@ -2,8 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": false,
-    "module": "es2022",
-    "moduleResolution": "node",
+    "module": "commonjs",
     "strict": true,
     "outDir": "lib",
     "removeComments": true,

@@ -30,12 +30,12 @@ import {
   connectFirestoreEmulator,
 } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
-import { logger } from "./logger.js";
-import { TranslationTask } from "./shared/xlate.js";
-import { xlateDevOrigin } from "./api.js";
-import { isSimulator } from "./pkg.js";
-import { configstore } from "./configstore.js";
-import { request } from "./api.js";
+import { logger } from "./logger";
+import { TranslationTask } from "./shared/xlate";
+import { xlateDevOrigin } from "./api";
+import { isSimulator } from "./pkg";
+import { configstore } from "./configstore";
+import { request } from "./api";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB91QOsFjrDJuTEZzrWun27FOHzUjCSofA",
@@ -161,7 +161,7 @@ export const signinWithRefreshToken = async (refreshToken: string) => {
 };
 
 export const signinWithConfigstore = async () => {
-  const u = configstore.get("user");
+  const u = (await configstore).get("user");
   if (!(u && u.stsTokenManager && u.stsTokenManager.refreshToken)) {
     return;
   }

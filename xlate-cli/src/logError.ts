@@ -1,6 +1,6 @@
-import { logger } from "./logger.js";
-import clc from "cli-color";
-import { XLateError } from "./error.js";
+import { logger } from "./logger";
+import * as clc from "cli-color";
+import { XLateError } from "./error";
 
 export default function (error: XLateError) {
   if (error.children && error.children.length) {

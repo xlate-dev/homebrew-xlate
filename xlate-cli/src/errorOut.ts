@@ -1,5 +1,5 @@
-import { XLateError } from "./error.js";
-import logError from "./logError.js";
+import { XLateError } from "./error";
+import logError from "./logError";
 
 /**
  * Errors out by calling `process.exit` with an exit code of 2.

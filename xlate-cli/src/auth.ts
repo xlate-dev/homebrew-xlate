@@ -1,17 +1,17 @@
-import clc from "cli-color";
-import portfinder from "portfinder";
-import { track } from "./track.js";
-import fs from "fs";
-import http from "http";
-import { logger } from "./logger.js";
-import path from "path";
-import url from "url";
-import util from "util";
-import * as api from "./api.js";
-import open from "open";
-import { XLateError } from "./error.js";
-import { getXlateDevOrigin } from "./firebase.js";
-import { getDirname, isSimulator } from "./pkg.js";
+import * as clc from "cli-color";
+import * as portfinder from "portfinder";
+import { track } from "./track";
+import * as fs from "fs";
+import * as http from "http";
+import { logger } from "./logger";
+import * as path from "path";
+import * as url from "url";
+import * as util from "util";
+import * as api from "./api";
+import * as open from "open";
+import { XLateError } from "./error";
+import { getXlateDevOrigin } from "./firebase";
+import { getDirname, isSimulator } from "./pkg";
 
 const localStorageKey = `XLATE_${
   isSimulator ? "SIM_" : ""
