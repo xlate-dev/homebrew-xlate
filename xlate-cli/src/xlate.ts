@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import clc from "cli-color";
-import { Command } from "commander";
-import { signInWithCustomToken } from "firebase/auth";
+import { Command, OptionValues } from "commander";
 import { loginGithub } from "./auth.js";
 import { configstore } from "./configstore.js";
 import { XLateError } from "./error.js";
@@ -21,9 +20,11 @@ const AUTH_ERROR_MESSAGE = `Command requires authentication, please run ${clc.bo
   "xlate login"
 )}`;
 
-const translateAction = async (_: any, command: Command) => {
-  const args = command.args;
-  const opts = command.opts();
+const translateAction = async (
+  args: string[],
+  opts: OptionValues
+  //command: Command
+) => {
   const { token } = opts;
   const user = token
     ? await signinWithRefreshToken(token)
@@ -36,11 +37,12 @@ const translateAction = async (_: any, command: Command) => {
   }
 };
 
-program.option("--token [token]", "ci token");
+program.option("--token [token]", "ci/cd token");
 
 program
   .name("xlate")
-  .description("CLI to xlate translation tools")
+  .argument("[langs...]")
+  .description("xlate translation tools")
   .version(pkg.version)
   .parse(process.argv)
   .action(translateAction);

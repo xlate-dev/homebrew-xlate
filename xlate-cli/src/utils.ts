@@ -27,3 +27,4 @@ export function envOverride(
 }
 
 export const homedir = os.homedir();
+export const tempdir = os.tmpdir();

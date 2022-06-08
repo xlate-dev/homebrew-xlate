@@ -11,7 +11,7 @@ import {
   uploadFile,
 } from "./firebase.js";
 import { logger } from "./logger.js";
-import { homedir } from "./utils.js";
+import { tempdir } from "./utils.js";
 import * as stream from "stream";
 import { TranslationTask } from "./shared/xlate.js";
 import child_process from "child_process";
@@ -71,7 +71,7 @@ export const translate = async (dir: string, args: string[]) => {
 
       // knownRegions = knownRegions.filter((r) => r === "Base");
       if (knownRegions.length) {
-        const localPrefix = `${homedir}/.xlate/data`;
+        const localPrefix = `${tempdir}/.xlate/data`;
         const relativeTaskPath = `xlate/${userId}/${taskId}`;
         const relativeXlocsPath = `${relativeTaskPath}/xclocs`;
         const relativeTranslatedXclocsPath = `${relativeTaskPath}/xclocs_translated`;

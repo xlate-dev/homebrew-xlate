@@ -10,16 +10,12 @@ import util from "util";
 import * as api from "./api.js";
 import open from "open";
 import { XLateError } from "./error.js";
-import { LocalStorage } from "node-localstorage";
-import { homedir } from "./utils.js";
 import { getXlateDevOrigin } from "./firebase.js";
 import { getDirname, isSimulator } from "./pkg.js";
 
 const localStorageKey = `XLATE_${
   isSimulator ? "SIM_" : ""
 }loginGithubWithCachedKey`;
-
-const localStorage = new LocalStorage(`${homedir}/.xlate/storage`);
 
 // The wire protocol for an access token returned by Google.
 // When we actually refresh from the server we should always have
@@ -175,22 +171,4 @@ async function loginWithLocalhostGitHub(port: number): Promise<string> {
 export async function loginGithub(): Promise<string> {
   const port = await getPort();
   return loginWithLocalhostGitHub(port);
-}
-
-export async function loginGithubWithCachedKey(): Promise<string> {
-  const cached: string = localStorage.getItem(localStorageKey) as string;
-  if (cached) return cached;
-  const port = await getPort();
-  const newToken = await loginWithLocalhostGitHub(port);
-  if (newToken) {
-    localStorage.setItem(localStorageKey, newToken);
-  }
-  return newToken;
-}
-
-export function setGithubWithCachedKey(newToken: string) {
-  localStorage.setItem(localStorageKey, newToken);
-}
-export function clearGithubWithCachedKey() {
-  localStorage.setItem(localStorageKey, "");
 }

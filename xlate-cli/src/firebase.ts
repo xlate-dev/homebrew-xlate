@@ -7,7 +7,6 @@ import {
   signInWithCustomToken,
   GoogleAuthProvider,
   signInWithCredential,
-  UserCredential,
   User,
 } from "firebase/auth";
 import {
