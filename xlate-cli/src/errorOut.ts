@@ -5,7 +5,7 @@ import logError from "./logError";
  * Errors out by calling `process.exit` with an exit code of 2.
  * @param error an Error to be logged.
  */
-export function errorOut(error: Error): void {
+export function errorOut(error: Error, withExit: boolean = true): void {
   let xlError: XLateError;
   if (error instanceof XLateError) {
     xlError = error;
@@ -17,8 +17,10 @@ export function errorOut(error: Error): void {
   }
 
   logError(xlError);
-  process.exitCode = xlError.exit || 2;
-  setTimeout(() => {
-    process.exit();
-  }, 250);
+  if (withExit) {
+    process.exitCode = xlError.exit || 2;
+    setTimeout(() => {
+      process.exit();
+    }, 250);
+  }
 }

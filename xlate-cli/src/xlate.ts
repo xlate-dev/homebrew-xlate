@@ -31,7 +31,8 @@ const translateAction = async (
     : await signinWithConfigstore();
   if (user) {
     const dir = process.cwd();
-    translate(dir, args);
+    await translate(dir, args);
+    process.exit(1);
   } else {
     throw new XLateError(AUTH_ERROR_MESSAGE);
   }
