@@ -12,34 +12,14 @@ import open from "open";
 import { XLateError } from "./error.js";
 import { LocalStorage } from "node-localstorage";
 import { homedir } from "./utils.js";
-import { getXlateDevOrigin, isSimulator } from "./firebase.js";
-import { configstore } from "./configstore.js";
-import { getDirname } from "./pkg.js";
+import { getXlateDevOrigin } from "./firebase.js";
+import { getDirname, isSimulator } from "./pkg.js";
 
 const localStorageKey = `XLATE_${
   isSimulator ? "SIM_" : ""
 }loginGithubWithCachedKey`;
 
 const localStorage = new LocalStorage(`${homedir}/.xlate/storage`);
-
-export interface User {
-  email: string;
-
-  iss?: string;
-  azp?: string;
-  aud?: string;
-  sub?: number;
-  hd?: string;
-  email_verified?: boolean;
-  at_hash?: string;
-  iat?: number;
-  exp?: number;
-}
-
-export interface Account {
-  user: User;
-  tokens: Tokens;
-}
 
 // The wire protocol for an access token returned by Google.
 // When we actually refresh from the server we should always have
@@ -162,7 +142,7 @@ async function loginWithLocalhost<ResultType>(
 async function getGithubTokensFromAuthorizationCode(
   code: string,
   callbackUrl: string
-) {
+): Promise<string> {
   const response = await api.request(`${getXlateDevOrigin()}/login`, {
     method: "POST",
     headers: {
@@ -206,22 +186,6 @@ export async function loginGithubWithCachedKey(): Promise<string> {
     localStorage.setItem(localStorageKey, newToken);
   }
   return newToken;
-}
-
-export function getGlobalDefaultAccount(): Account | undefined {
-  const user = configstore.get("user") as User | undefined;
-  const tokens = configstore.get("tokens") as Tokens | undefined;
-
-  // TODO: Is there ever a case where only User or Tokens is defined
-  //       and we want to accept that?
-  if (!user || !tokens) {
-    return undefined;
-  }
-
-  return {
-    user,
-    tokens,
-  };
 }
 
 export function setGithubWithCachedKey(newToken: string) {

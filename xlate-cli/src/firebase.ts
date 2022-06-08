@@ -4,10 +4,11 @@ import {
   connectAuthEmulator,
   getAuth,
   GithubAuthProvider,
+  signInWithCustomToken,
   GoogleAuthProvider,
   signInWithCredential,
-  User,
   UserCredential,
+  User,
 } from "firebase/auth";
 import {
   connectStorageEmulator,
@@ -30,10 +31,12 @@ import {
   connectFirestoreEmulator,
 } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
-
 import { logger } from "./logger.js";
 import { TranslationTask } from "./shared/xlate.js";
 import { xlateDevOrigin } from "./api.js";
+import { isSimulator } from "./pkg.js";
+import { configstore } from "./configstore.js";
+import { request } from "./api.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB91QOsFjrDJuTEZzrWun27FOHzUjCSofA",
@@ -51,10 +54,6 @@ export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const firestore = getFirestore(app);
-
-const { IS_SIMULATOR } = process.env;
-
-export const isSimulator = IS_SIMULATOR === "true";
 
 if (isSimulator) {
   connectAuthEmulator(auth, "http://localhost:9099");
@@ -123,19 +122,48 @@ export const listenToTask = (
 
 auth.onAuthStateChanged(async (user: User | null) => {
   if (user) {
-    logger.info("User authorized", user);
+    logger.info("User authorized");
   }
 });
 
 export const signinFirebase = async (
   githubAccessToken: string
-): Promise<UserCredential> => {
+): Promise<User> => {
   const credential = isSimulator
     ? GoogleAuthProvider.credential(
-        '{"sub": "abc123", "email": "foo@example.com", "email_verified": true}'
+        JSON.stringify({
+          //uid: "7Iw899UGngyMe6nj5Efp6aEGb7tV",
+          sub: "abc123",
+          email: "foo@example.com",
+          email_verified: true,
+        })
       )
     : GithubAuthProvider.credential(githubAccessToken);
-  const user = await signInWithCredential(auth, credential);
+  const userCred = await signInWithCredential(auth, credential);
+  const user = userCred.user;
+  configstore.set("user", user.toJSON());
   return user;
   //ToDo implement refreshtoken
+};
+
+export const signinFirebaseWithConfigstore = async () => {
+  const u = configstore.get("user");
+  if (!(u && u.stsTokenManager && u.stsTokenManager.refreshToken)) {
+    return;
+  }
+
+  const response = await request(`${getXlateDevOrigin()}/custom_token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      refresh_token: u.stsTokenManager.refreshToken,
+    }),
+  });
+  const respJson: { custom_token: string } = await response.json();
+
+  const userCred = await signInWithCustomToken(auth, respJson.custom_token);
+  const user = userCred.user;
+  return user;
 };

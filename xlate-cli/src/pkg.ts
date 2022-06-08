@@ -15,3 +15,7 @@ export const pkg = {
   version: packageJson.version ?? "",
   name: packageJson.name ?? "",
 };
+
+const { IS_SIMULATOR } = process.env;
+
+export const isSimulator = IS_SIMULATOR === "true";
