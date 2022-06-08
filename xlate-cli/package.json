@@ -1,6 +1,6 @@
 {
   "name": "xlate",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Translate your XCode project into multiple target languages with one command!",
   "main": "index.js",
   "bin": {
