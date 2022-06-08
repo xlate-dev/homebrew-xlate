@@ -38,19 +38,18 @@ const translateAction = async (
   }
 };
 
-program.option("--token [token]", "ci/cd token");
-
 program
   .name("xlate")
   .argument("[langs...]")
-  .description("xlate translation tools")
+  .description("automated translation for iOS developers")
   .version(pkg.version)
-  .parse(process.argv)
   .action(translateAction);
+
+program.option("--token [token]", "supply an auth token for command");
 
 program
   .command("login")
-  .description("login with GitHub")
+  .description("log the CLI into xlate with Github")
   .action(async () => {
     const user = await signinWithConfigstore();
     if (!user) {
@@ -77,12 +76,12 @@ program
 
 program
   .command("logout")
-  .description("logout with GitHub")
+  .description("log the CLI out of xlate")
   .action(async () => {
     configstore.delete("user");
   });
 
-program.parse();
+program.parse(process.argv);
 
 process.on("uncaughtException", function (err) {
   errorOut(err);
