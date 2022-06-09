@@ -26,5 +26,17 @@ export function envOverride(
   return value;
 }
 
+export function tryStringify(value: any) {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return value;
+  }
+}
+
 export const homedir = os.homedir();
 export const tempdir = os.tmpdir();

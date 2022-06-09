@@ -1,5 +1,9 @@
 import * as winston from "winston";
 import * as Transport from "winston-transport";
+import { strip } from "cli-color";
+import * as path from "path";
+import * as fs from "fs";
+import * as utils from "./utils";
 
 export type LogLevel =
   | "error"
@@ -96,12 +100,52 @@ rawLogger.add(
 );
 rawLogger.exitOnError = false;
 
+function findAvailableLogFile() {
+  const candidates = ["xlate-debug.log"];
+  for (let i = 1; i < 10; i++) {
+    candidates.push(`xlate-debug.${i}.log`);
+  }
+
+  for (const c of candidates) {
+    const logFilename = path.join(process.cwd(), c);
+
+    try {
+      const fd = fs.openSync(logFilename, "r+");
+      fs.closeSync(fd);
+      return logFilename;
+    } catch (e) {
+      if ((e as any).code === "ENOENT") {
+        // File does not exist, which is fine
+        return logFilename;
+      }
+
+      // Any other error (EPERM, etc) means we won't be able to log to
+      // this file so we skip it.
+    }
+  }
+
+  throw new Error("Unable to obtain permissions for firebase-debug.log");
+}
+
+const logFilename = findAvailableLogFile();
+
 // The type system for TypeScript is a bit wonky. The type of winston.LeveledLogMessage
 // and winston.LogMessage is an interface of function overloads. There's no easy way to
 // extend that and also subclass Logger to change the return type of those methods to
 // allow error parameters.
 // Casting looks super dodgy, but it should be safe because we know the underlying code
 // handles all parameter types we care about.
-export const logger = annotateDebugLines(
-  expandErrors(rawLogger)
-) as unknown as Logger;
+export const logger = expandErrors(rawLogger) as unknown as Logger;
+
+logger.add(
+  new winston.transports.File({
+    level: "debug",
+    filename: logFilename,
+    format: winston.format.printf((info) => {
+      const segments = [info.message /*, ...(info[SPLAT] || [])*/].map(
+        utils.tryStringify
+      );
+      return `[${Date.now()}]-[${info.level}] ${strip(segments.join(" "))}`;
+    }),
+  })
+);
