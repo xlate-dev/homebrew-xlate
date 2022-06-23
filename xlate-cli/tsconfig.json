@@ -10,7 +10,7 @@
     "target": "es2017",
     "sourceMap": true,
     "resolveJsonModule": true,
-    "skipLibCheck": false
+    "skipLibCheck": true
   },
   "include": ["src/**/*"]
 }

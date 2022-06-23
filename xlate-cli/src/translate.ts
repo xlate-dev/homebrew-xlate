@@ -16,10 +16,16 @@ import * as stream from "stream";
 import { TranslationTask } from "./shared/xlate";
 import * as child_process from "child_process";
 import { errorOut } from "./errorOut";
+import { promptOnce } from "./prompt";
+import { langs } from "./langs";
 
 const pipeline = promisify(stream.pipeline);
 
 const exec = promisify(child_process.exec);
+
+export interface TranslateResult {
+  newArgs: string[];
+}
 
 async function scanDir(
   startPath: string,
@@ -43,8 +49,13 @@ async function scanDir(
   }
 }
 
-export const translate = async (dir: string, args: string[]) => {
+export const translate = async (
+  dir: string,
+  args: string[],
+  silent: boolean = false
+): Promise<TranslateResult> => {
   const start = Date.now();
+  const newArgs: string[] = [];
   logger.info("looking for an .xcodeproj...");
   await scanDir(dir, ".xcodeproj", async (xcodeprojDir) => {
     const projectName = path.basename(xcodeprojDir, ".xcodeproj");
@@ -162,6 +173,19 @@ export const translate = async (dir: string, args: string[]) => {
                         }
                       } else {
                         logger.info("nothing translated");
+                        if (!silent) {
+                          const langChoice: string[] = await promptOnce({
+                            type: "checkbox",
+                            name: "language",
+                            message:
+                              "Please select new languages to translate:",
+                            choices: langs.map((l) => ({
+                              value: l.code,
+                              name: l.name,
+                            })),
+                          });
+                          langChoice.forEach((lc) => newArgs.push(lc));
+                        }
                       }
                       logger.info("completed");
                       unsubscribeFromTask();
@@ -192,4 +216,7 @@ export const translate = async (dir: string, args: string[]) => {
     }
   });
   logger.info(`Time Taken to execute = ${(Date.now() - start) / 1000} seconds`);
+  return {
+    newArgs: newArgs,
+  };
 };

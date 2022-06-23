@@ -12,7 +12,7 @@ import {
 } from "./firebase";
 import { logger } from "./logger";
 import { pkg } from "./pkg";
-import { translate } from "./translate";
+import { translate, TranslateResult } from "./translate";
 
 const program = new Command();
 
@@ -25,13 +25,17 @@ const translateAction = async (
   opts: OptionValues
   //command: Command
 ) => {
-  const { token } = opts;
+  const { token, silent } = opts;
   const user = token
     ? await signinWithRefreshToken(token)
     : await signinWithConfigstore();
   if (user) {
     const dir = process.cwd();
-    await translate(dir, args);
+    let result = await translate(dir, args, silent);
+    while (result.newArgs.length > 0) {
+      const newArgs = [...result.newArgs];
+      result = await translate(dir, newArgs, silent);
+    }
     process.exit(1);
   } else {
     throw new XLateError(AUTH_ERROR_MESSAGE);
@@ -46,6 +50,7 @@ program
   .action(translateAction);
 
 program.option("--token [token]", "supply an auth token for command");
+program.option("--silent", "silent execution mode");
 
 program
   .command("login")
