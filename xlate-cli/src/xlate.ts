@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import * as clc from "cli-color";
 import { Command, OptionValues } from "commander";
+import * as fs from "fs";
+import * as _path from "path";
 import { loginGithub } from "./auth";
 import { configstore } from "./configstore";
 import { XLateError } from "./error";
@@ -12,7 +14,7 @@ import {
 } from "./firebase";
 import { logger } from "./logger";
 import { pkg } from "./pkg";
-import { translate, TranslateResult } from "./translate";
+import { translate } from "./translate";
 
 const program = new Command();
 
@@ -25,12 +27,18 @@ const translateAction = async (
   opts: OptionValues
   //command: Command
 ) => {
-  const { token, silent } = opts;
+  const { token, silent, path } = opts;
   const user = token
     ? await signinWithRefreshToken(token)
     : await signinWithConfigstore();
   if (user) {
-    const dir = process.cwd();
+    let dir = path || process.cwd();
+    if (!fs.existsSync(dir)) {
+      dir = _path.join(__dirname, dir);
+      if (!fs.existsSync(dir)) {
+        throw new XLateError(`Wrong directory ${dir}`);
+      }
+    }
     let result = await translate(dir, args, silent);
     while (result.newArgs.length > 0) {
       const newArgs = [...result.newArgs];
@@ -51,6 +59,7 @@ program
 
 program.option("--token [token]", "supply an auth token for command");
 program.option("--silent", "silent execution mode");
+program.option("--path [path]", "path for xlate start");
 
 program
   .command("login")
